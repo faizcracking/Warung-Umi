@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Warung Umi - Belanja Sembako Online</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        body { background: #f5f5f5; }
+        .header-fixed { position: fixed; top: 0; left: 0; right: 0; background: white; z-index: 1000; box-shadow: 0 2px 20px rgba(0,0,0,0.05); }
+        .top-bar { background: #d32f2f; color: white; padding: 6px 16px; text-align: center; font-size: 12px; }
+        .navbar { padding: 12px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo img { width: 45px; height: 45px; border-radius: 12px; background: white; padding: 5px; }
+        .logo-text h1 { font-size: 1.3rem; color: #d32f2f; }
+        .logo-text span { font-size: 0.65rem; color: #666; }
+        .search-container { flex: 1; max-width: 450px; position: relative; }
+        .search-box { display: flex; background: #f0f0f0; border-radius: 40px; padding: 5px 15px; }
+        .search-box input { flex: 1; border: none; background: none; padding: 10px 0; outline: none; }
+        .search-box button { background: none; border: none; font-size: 18px; cursor: pointer; color: #d32f2f; }
+        .cart-icon { background: #f0f0f0; padding: 8px 16px; border-radius: 40px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .cart-count { background: #d32f2f; color: white; border-radius: 30px; padding: 2px 8px; font-size: 12px; }
+        .main-content { padding-top: 110px; }
+        .hero { background: linear-gradient(135deg, #d32f2f, #e65100); padding: 60px 24px; text-align: center; color: white; }
+        .hero h2 { font-size: 1.8rem; margin-bottom: 8px; }
+        .wa-number { background: #25D366; display: inline-block; padding: 10px 24px; border-radius: 50px; color: white; text-decoration: none; margin-top: 16px; }
+        .promo-section { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
+        .promo-banner { background: linear-gradient(135deg, #d32f2f, #e65100); border-radius: 16px; padding: 16px 24px; color: white; text-align: center; cursor: pointer; }
+        .promo-title { font-size: 1.2rem; font-weight: bold; }
+        .promo-desc { font-size: 0.85rem; opacity: 0.95; margin-top: 4px; }
+        .kategori-section { max-width: 1200px; margin: 0 auto 24px; padding: 0 20px; }
+        .kategori-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .chip { background: white; border: 1px solid #ddd; padding: 8px 18px; border-radius: 40px; cursor: pointer; font-size: 13px; }
+        .chip.active, .chip:hover { background: #d32f2f; color: white; }
+        .products-section { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px; }
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .product-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .product-img { height: 150px; background-size: cover; background-position: center; background-color: #f0e4d0; }
+        .product-info { padding: 12px; }
+        .product-name { font-weight: 700; font-size: 0.9rem; }
+        .product-weight { font-size: 10px; color: #888; margin: 4px 0; }
+        .price { font-size: 1.1rem; font-weight: 800; color: #d32f2f; margin: 6px 0; }
+        .qty-control { display: flex; align-items: center; justify-content: space-between; background: #f5f5f5; border-radius: 30px; padding: 2px; margin: 8px 0; }
+        .qty-btn { background: white; border: none; width: 28px; height: 28px; border-radius: 30px; font-size: 1rem; cursor: pointer; }
+        .btn-wa { background: #25D366; width: 100%; border: none; padding: 8px; border-radius: 30px; color: white; font-weight: 600; cursor: pointer; }
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 32px; flex-wrap: wrap; }
+        .page-btn { background: white; border: 1px solid #ddd; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+        .page-btn.active { background: #d32f2f; color: white; }
+        .cart-sidebar { position: fixed; top: 0; right: -380px; width: 360px; height: 100vh; background: white; z-index: 1001; transition: 0.3s; padding: 20px; display: flex; flex-direction: column; box-shadow: -4px 0 20px rgba(0,0,0,0.15); }
+        .cart-sidebar.open { right: 0; }
+        .overlay { position: fixed; top:0;left:0;width:100%;height:100%; background: rgba(0,0,0,0.4); visibility: hidden; z-index: 1000; }
+        .overlay.active { visibility: visible; }
+        .checkout-btn { background: #25D366; border: none; padding: 14px; border-radius: 40px; color: white; font-weight: bold; margin-top: 12px; cursor: pointer; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .cart-remove-btn { background: none; border: none; font-size: 16px; cursor: pointer; color: #dc3545; }
+        .footer-main { background: #1a1a2e; color: #aaa; text-align: center; padding: 32px 16px; }
+        .hashtags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .hashtags span { background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 30px; font-size: 11px; }
+        .footer-wa { background: #25D366; display: inline-block; padding: 8px 20px; border-radius: 30px; color: white; text-decoration: none; margin: 15px 0; }
+        .admin-link { position: fixed; bottom: 20px; right: 20px; background: #1a1a2e; color: white; padding: 6px 14px; border-radius: 30px; font-size: 11px; text-decoration: none; opacity: 0.4; }
+        .admin-link:hover { opacity: 1; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 480px) { .navbar { padding: 10px 16px; } .search-container { order: 3; max-width: 100%; width: 100%; margin-top: 8px; } .logo { order: 1; } .cart-icon { order: 2; } .kategori-grid { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; } }
+    </style>
+</head>
+<body>
+<div class="header-fixed">
+    <div class="top-bar">🕌 Warung Umi - Belanja Sembako | WA: 0852-1320-5216</div>
+    <div class="navbar">
+        <div class="logo"><img src="https://i.ibb.co.com/wf9YScd/logo-warung-umi.png" alt="Warung Umi Logo" onerror="this.src='https://via.placeholder.com/45?text=🕌'"><div class="logo-text"><h1>Warung Umi</h1><span>Pasar Keluarga Indonesia</span></div></div>
+        <div class="search-container"><div class="search-box"><input type="text" id="searchInput" placeholder="Cari produk..."><button id="searchBtn">🔍</button></div></div>
+        <div class="cart-icon" id="cartIcon">🛒 <span class="cart-count" id="cartCount">0</span></div>
+    </div>
+</div>
+<div class="main-content">
+    <div class="hero"><h2>🍚 Belanja Sembako</h2><p>Murah, Berkah, dan Sampai ke Rumah Anda</p><a href="https://wa.me/6285213205216" class="wa-number" target="_blank">📞 Order via WhatsApp</a></div>
+    <div class="promo-section"><div class="promo-banner" onclick="window.open('https://wa.me/6285213205216', '_blank')"><div class="promo-title">🎉 PROMO HEMAT! 🎉</div><div class="promo-desc">Gratis Ongkir + Diskon s/d 20%</div></div></div>
+    <div class="kategori-section"><div class="kategori-grid" id="kategoriFilter">
+        <div class="chip active" data-kategori="semua">Semua</div>
+        <div class="chip" data-kategori="beras">🍚 Beras</div>
+        <div class="chip" data-kategori="minyak">🫒 Minyak</div>
+        <div class="chip" data-kategori="gula">🍬 Gula & Teh</div>
+        <div class="chip" data-kategori="telur">🥚 Telur & Susu</div>
+        <div class="chip" data-kategori="instan">🍜 Mie Instan</div>
+        <div class="chip" data-kategori="bumbu">🧂 Bumbu</div>
+        <div class="chip" data-kategori="roti">🍞 Roti & Kue</div>
+        <div class="chip" data-kategori="sabun">🧴 Sabun & Deterjen</div>
+        <div class="chip" data-kategori="kopi">☕ Kopi & Minuman</div>
+        <div class="chip" data-kategori="kaleng">🥫 Makanan Kaleng</div>
+        <div class="chip" data-kategori="rumah">🧻 Perlengkapan Rumah</div>
+    </div></div>
+    <div class="products-section"><div class="product-grid" id="productGrid"><div class="loading">⏳ Memuat produk...</div></div><div class="pagination" id="pagination"></div></div>
+</div>
+<a href="admin.html" class="admin-link">🔧 Admin</a>
+<div class="footer-main"><div class="hashtags"><span>#WarungUmi</span><span>#BelanjaSembako</span><span>#MurahBerkah</span><span>#PesanViaWA</span></div><a href="https://wa.me/6285213205216" class="footer-wa" target="_blank">📞 Hubungi via WhatsApp</a><div class="footer-text">Warung Umi | Jual Sembako & Keperluan Harian | © 2025</div></div>
+<div class="overlay" id="overlay"></div>
+<div class="cart-sidebar" id="cartSidebar"><div style="display: flex; justify-content: space-between;"><h3>🛍️ Keranjang</h3><button id="closeCartBtn" style="background:none; border:none; font-size:1.5rem;">✕</button></div><div id="cartItemsList" style="flex:1; overflow:auto; margin: 15px 0;"></div><div id="cartTotalPrice" style="font-weight:800; font-size:1.2rem;">Total: Rp0</div><button class="checkout-btn" id="checkoutWA">✅ Kirim ke WhatsApp</button></div>
+
+<script>
+    // ========== KONFIGURASI FIREBASE ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyCQZWasLfwfncSgjK4Xo4OqAXs9c3SedPM",
+        authDomain: "warung-umi.firebaseapp.com",
+        projectId: "warung-umi",
+        storageBucket: "warung-umi.firebasestorage.app",
+        messagingSenderId: "853257572035",
+        appId: "1:853257572035:web:e002156b258322f62fdc76",
+        measurementId: "G-HFGTKJBHCQ"
+    };
+    
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // ========== VARIABEL GLOBAL ==========
+    let products = [];
+    let cart = [];
+    let currentFilter = "semua";
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let searchQuery = "";
+    let promoData = { title: "🎉 PROMO HEMAT! 🎉", desc: "Gratis Ongkir + Diskon s/d 20%" };
+    
+    // ========== AMBIL DATA PRODUK DARI FIRESTORE ==========
+    async function loadProductsFromFirestore() {
+        const grid = document.getElementById("productGrid");
+        grid.innerHTML = "<div class='loading'>⏳ Memuat produk...</div>";
+        
+        try {
+            const snapshot = await db.collection("products").orderBy("name").get();
+            products = [];
+            snapshot.forEach(doc => {
+                products.push({ id: doc.id, ...doc.data() });
+            });
+            
+            if (products.length === 0) {
+                await seedDefaultProducts();
+                await loadProductsFromFirestore();
+                return;
+            }
+            
+            renderProducts();
+        } catch (error) {
+            console.error("Error loading products:", error);
+            grid.innerHTML = "<div class='loading'>❌ Gagal memuat data. Coba refresh halaman.</div>";
+        }
+    }
+    
+    // ========== DATA PRODUK DEFAULT ==========
+    async function seedDefaultProducts() {
+        const defaultProducts = [
+            { name: "Beras Raja Umi", kategori: "beras", price: 72000, image: "https://images.tokopedia.net/img/cache/500-square/VqbcmM/2023/1/23/0edba50f-857f-4d8a-9244-136f4e3215f0.jpg", weight: "5kg" },
+            { name: "Minyak Goreng Bimoli", kategori: "minyak", price: 34500, image: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//104/MTA-157408265/bimoli_minyak-goreng-bimoli-2-liter_full02.jpg", weight: "2L" },
+            { name: "Gulaku Premium", kategori: "gula", price: 17500, image: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//92/MTA-134687265/gulaku_gulaku-premium-1kg_full02.jpg", weight: "1kg" },
+            { name: "Telur Ayam", kategori: "telur", price: 28500, image: "https://images.tokopedia.net/img/cache/500-square/VqbcmM/2020/11/25/5507a22a-8e9e-4e88-b1e1-6f8afb9ac9de.jpg", weight: "1kg" },
+            { name: "Indomie Goreng", kategori: "instan", price: 126000, image: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//96/MTA-16273696/indomie_indomie-goreng-1-dus-40-pcs-_full02.jpg", weight: "40pcs" },
+            { name: "Kecap Bango", kategori: "bumbu", price: 18500, image: "https://images.tokopedia.net/img/cache/500-square/VqbcmM/2022/6/8/91d54f99-e9e6-4cf2-8997-1746a9a85535.jpg", weight: "600ml" }
+        ];
+        
+        for (const prod of defaultProducts) {
+            await db.collection("products").add(prod);
+        }
+    }
+    
+    // ========== AMBIL DATA PROMO DARI FIRESTORE ==========
+    async function loadPromoFromFirestore() {
+        try {
+            const promoDoc = await db.collection("settings").doc("promo").get();
+            if (promoDoc.exists) {
+                promoData = promoDoc.data();
+            }
+            renderPromo();
+        } catch (error) {
+            console.error("Error loading promo:", error);
+        }
+    }
+    
+    function renderPromo() {
+        const promoTitle = document.querySelector(".promo-title");
+        const promoDesc = document.querySelector(".promo-desc");
+        if (promoTitle) promoTitle.innerText = promoData.title || "🎉 PROMO HEMAT! 🎉";
+        if (promoDesc) promoDesc.innerText = promoData.desc || "Gratis Ongkir + Diskon s/d 20%";
+    }
+    
+    // ========== FUNGSI RENDER PRODUK ==========
+    function getFilteredProducts() {
+        let filtered = [...products];
+        if (currentFilter !== "semua") {
+            filtered = filtered.filter(p => p.kategori === currentFilter);
+        }
+        if (searchQuery.trim() !== "") {
+            filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return filtered;
+    }
+    
+    function renderProducts() {
+        const filtered = getFilteredProducts();
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage;
+        const paginated = filtered.slice(start, start + itemsPerPage);
+        
+        const grid = document.getElementById("productGrid");
+        if (paginated.length === 0) {
+            grid.innerHTML = "<div style='text-align:center; padding:40px;'>Produk tidak ditemukan</div>";
+        } else {
+            grid.innerHTML = paginated.map(prod => {
+                const cartItem = cart.find(c => c.id === prod.id);
+                const qty = cartItem ? cartItem.quantity : 0;
+                return `<div class="product-card">
+                    <div class="product-img" style="background-image: url('${prod.image || 'https://via.placeholder.com/150?text=🛒'}');"></div>
+                    <div class="product-info">
+                        <div class="product-name">${prod.name}</div>
+                        <div class="product-weight">📦 ${prod.weight}</div>
+                        <div class="price">Rp${prod.price.toLocaleString()}</div>
+                        <div class="qty-control">
+                            <button class="qty-btn minus" data-id="${prod.id}">-</button>
+                            <span>${qty}</span>
+                            <button class="qty-btn plus" data-id="${prod.id}">+</button>
+                        </div>
+                        <button class="btn-wa quick-order" data-id="${prod.id}">💬 Beli</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        
+        // Pagination
+        const paginationDiv = document.getElementById("pagination");
+        if (totalPages <= 1) {
+            paginationDiv.innerHTML = "";
+        } else {
+            let pages = [];
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(`<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`);
+            }
+            paginationDiv.innerHTML = pages.join('');
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.onclick = () => {
+                    currentPage = parseInt(btn.dataset.page);
+                    renderProducts();
+                    window.scrollTo({ top: 0 });
+                };
+            });
+        }
+        attachProductEvents();
+    }
+    
+    function attachProductEvents() {
+        document.querySelectorAll('.plus').forEach(btn => {
+            btn.onclick = () => addToCart(btn.dataset.id);
+        });
+        document.querySelectorAll('.minus').forEach(btn => {
+            btn.onclick = () => removeFromCart(btn.dataset.id);
+        });
+        document.querySelectorAll('.quick-order').forEach(btn => {
+            btn.onclick = () => directOrder(btn.dataset.id);
+        });
+    }
+    
+    // ========== KERANJANG (LocalStorage) ==========
+    function loadCart() {
+        const saved = localStorage.getItem("warungUmi_cart");
+        if (saved) cart = JSON.parse(saved);
+        updateCartUI();
+    }
+    
+    function saveCart() {
+        localStorage.setItem("warungUmi_cart", JSON.stringify(cart));
+    }
+    
+    function addToCart(id) {
+        const prod = products.find(p => p.id === id);
+        if (!prod) return;
+        const existing = cart.find(c => c.id === id);
+        if (existing) existing.quantity++;
+        else cart.push({ id: prod.id, name: prod.name, price: prod.price, quantity: 1, weight: prod.weight });
+        saveCart();
+        updateCartUI();
+        renderProducts();
+    }
+    
+    function removeFromCart(id) {
+        const idx = cart.findIndex(c => c.id === id);
+        if (idx !== -1) {
+            if (cart[idx].quantity > 1) cart[idx].quantity--;
+            else cart.splice(idx, 1);
+        }
+        saveCart();
+        updateCartUI();
+        renderProducts();
+    }
+    
+    function deleteCartItem(id) {
+        cart = cart.filter(c => c.id !== id);
+        saveCart();
+        updateCartUI();
+        renderProducts();
+    }
+    
+    function updateCartUI() {
+        const count = cart.reduce((s, i) => s + i.quantity, 0);
+        document.getElementById("cartCount").innerText = count;
+        const container = document.getElementById("cartItemsList");
+        let total = 0;
+        if (cart.length === 0) {
+            container.innerHTML = "<p style='color:gray; text-align:center;'>Keranjang kosong</p>";
+        } else {
+            container.innerHTML = cart.map(item => {
+                total += item.price * item.quantity;
+                return `<div class="cart-item">
+                    <div><b>${item.name}</b><br><small>${item.weight}</small><br>Rp${item.price.toLocaleString()} x ${item.quantity}</div>
+                    <div style="display:flex; gap:8px;">
+                        <span style="font-weight:bold;">Rp${(item.price * item.quantity).toLocaleString()}</span>
+                        <button class="cart-remove-btn" data-id="${item.id}">🗑️</button>
+                    </div>
+                </div>`;
+            }).join('');
+            document.querySelectorAll('.cart-remove-btn').forEach(btn => {
+                btn.onclick = () => { if (confirm("Hapus?")) deleteCartItem(btn.dataset.id); };
+            });
+        }
+        document.getElementById("cartTotalPrice").innerHTML = `Total: Rp${total.toLocaleString()}`;
+    }
+    
+    // ========== PESAN WA RAPI ==========
+    function directOrder(productId) {
+        const prod = products.find(p => p.id === productId);
+        const msg = `*PESANAN WARUNG UMI*%0A─────────────────────%0A1. ${prod.name} (${prod.weight})%0A   Rp${prod.price.toLocaleString()} x 1 = Rp${prod.price.toLocaleString()}%0A─────────────────────%0A💰 TOTAL: Rp${prod.price.toLocaleString()}%0A─────────────────────%0A📦 Alamat: (isi alamat lengkap)%0A🙏 Terima kasih!`;
+        window.open(`https://wa.me/6285213205216?text=${msg}`, '_blank');
+    }
+    
+    function checkoutWA() {
+        if (cart.length === 0) { alert("Keranjang kosong"); return; }
+        let msg = "*PESANAN WARUNG UMI*%0A─────────────────────%0A";
+        let total = 0;
+        let no = 1;
+        cart.forEach(item => {
+            let sub = item.price * item.quantity;
+            total += sub;
+            msg += `${no}. ${item.name} (${item.weight})%0A   Rp${item.price.toLocaleString()} x ${item.quantity} = Rp${sub.toLocaleString()}%0A`;
+            no++;
+        });
+        msg += `─────────────────────%0A💰 TOTAL: Rp${total.toLocaleString()}%0A─────────────────────%0A📦 Alamat: (isi alamat lengkap)%0A🙏 Terima kasih!`;
+        window.open(`https://wa.me/6285213205216?text=${msg}`, '_blank');
+    }
+    
+    // ========== EVENT LISTENERS ==========
+    document.getElementById("searchBtn").onclick = () => {
+        searchQuery = document.getElementById("searchInput").value;
+        currentPage = 1;
+        renderProducts();
+    };
+    document.getElementById("searchInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            searchQuery = e.target.value;
+            currentPage = 1;
+            renderProducts();
+        }
+    });
+    
+    document.querySelectorAll(".chip").forEach(chip => {
+        chip.onclick = () => {
+            document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+            currentFilter = chip.dataset.kategori;
+            currentPage = 1;
+            renderProducts();
+        };
+    });
+    
+    const cartSide = document.getElementById("cartSidebar");
+    const overlay = document.getElementById("overlay");
+    document.getElementById("cartIcon").onclick = () => { cartSide.classList.add("open"); overlay.classList.add("active"); updateCartUI(); };
+    document.getElementById("closeCartBtn").onclick = () => { cartSide.classList.remove("open"); overlay.classList.remove("active"); };
+    overlay.onclick = () => { cartSide.classList.remove("open"); overlay.classList.remove("active"); };
+    document.getElementById("checkoutWA").onclick = checkoutWA;
+    
+    // ========== INIT ==========
+    loadCart();
+    loadProductsFromFirestore();
+    loadPromoFromFirestore();
+    
+    // Real-time listener untuk update produk otomatis
+    db.collection("products").onSnapshot(() => {
+        loadProductsFromFirestore();
+    });
+    
+    db.collection("settings").doc("promo").onSnapshot(() => {
+        loadPromoFromFirestore();
+    });
+</script>
+</body>
+</html>
