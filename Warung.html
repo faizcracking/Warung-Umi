@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Warung Umi - Belanja Sembako Online</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            color: #1a1a2e;
+        }
+
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            border-bottom: 1px solid #eee;
+        }
+
+        .top-bar {
+            background: #d32f2f;
+            color: white;
+            padding: 6px 16px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .navbar {
+            padding: 12px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: white;
+            padding: 5px;
+        }
+        .logo-text h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #d32f2f;
+            letter-spacing: -0.5px;
+        }
+        .logo-text span {
+            font-size: 0.65rem;
+            color: #666;
+            display: block;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 450px;
+            position: relative;
+        }
+        .search-box {
+            display: flex;
+            background: #f0f0f0;
+            border-radius: 40px;
+            padding: 5px 15px;
+            align-items: center;
+        }
+        .search-box input {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 10px 0;
+            font-size: 14px;
+            outline: none;
+        }
+        .search-box button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #d32f2f;
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            margin-top: 8px;
+            z-index: 100;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .search-suggestions.show {
+            display: block;
+        }
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.1s;
+        }
+        .suggestion-item:hover {
+            background: #f5f5f5;
+        }
+        .suggestion-item strong {
+            color: #d32f2f;
+        }
+        .suggestion-category {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .cart-icon {
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .cart-count {
+            background: #d32f2f;
+            color: white;
+            border-radius: 30px;
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+
+        .main-content {
+            padding-top: 110px;
+        }
+
+        .hero {
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLuxh_javTDSW2TCfvVPPWih-cz0zudXxSGQ&s');
+            background-size: cover;
+            background-position: center;
+            padding: 60px 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 0;
+        }
+        .hero h2, .hero p, .hero a {
+            position: relative;
+            z-index: 1;
+        }
+        .hero h2 { 
+            font-size: 1.8rem; 
+            color: white; 
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .hero p { 
+            color: #ffd700; 
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .wa-number {
+            background: #25D366;
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            margin-top: 16px;
+            text-decoration: none;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .warning-banner {
+            background: #ff9800;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            margin: 0 20px 20px;
+            border-radius: 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .warning-banner span {
+            font-size: 14px;
+        }
+        .warning-banner .close-warning {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .promo-section {
+            max-width: 1200px;
+            margin: 0 auto 24px;
+            padding: 0 20px;
+        }
+        .promo-banner {
+            background: linear-gradient(135deg, #d32f2f, #e65100);
+            border-radius: 16px;
+            padding: 16px 24px;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+        }
+        .promo-title { font-size: 1.2rem; font-weight: bold; }
+        .promo-desc { font-size: 0.85rem; opacity: 0.95; margin-top: 4px; }
+
+        .kategori-section {
+            max-width: 1200px;
+            margin: 0 auto 24px;
+            padding: 0 20px;
+        }
+        .kategori-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 8px;
+            padding-bottom: 8px;
+        }
+        .chip {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 8px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .chip.active, .chip:hover {
+            background: #d32f2f;
+            color: white;
+            border-color: #d32f2f;
+        }
+
+        .products-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        .product-img {
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+            background-color: #f0e4d0;
+        }
+        .product-info { padding: 12px; }
+        .product-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 2px; }
+        .product-weight { font-size: 10px; color: #888; margin-bottom: 6px; }
+        .price { font-size: 1.1rem; font-weight: 800; color: #d32f2f; margin: 6px 0; }
+        .qty-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f5f5f5;
+            border-radius: 30px;
+            padding: 2px;
+            margin: 8px 0;
+        }
+        .qty-btn {
+            background: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-wa {
+            background: #25D366;
+            width: 100%;
+            border: none;
+            padding: 8px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .page-btn.active {
+            background: #d32f2f;
+            color: white;
+            border-color: #d32f2f;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -380px;
+            width: 360px;
+            max-width: 90vw;
+            height: 100vh;
+            background: white;
+            z-index: 1001;
+            transition: 0.3s;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+        }
+        .cart-sidebar.open { right: 0; }
+        .overlay {
+            position: fixed;
+            top:0;left:0;width:100%;height:100%;
+            background: rgba(0,0,0,0.4);
+            visibility: hidden;
+            z-index: 1000;
+        }
+        .overlay.active { visibility: visible; }
+        .checkout-btn {
+            background: #25D366;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: white;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        .cart-remove-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #dc3545;
+        }
+
+        .footer-main {
+            background: #1a1a2e;
+            color: #aaa;
+            text-align: center;
+            padding: 32px 16px 24px;
+        }
+        .hashtags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .hashtags span {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+        }
+        .footer-wa {
+            background: #25D366;
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+            margin: 15px 0;
+        }
+        .footer-text {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .admin-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a1a2e;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            text-decoration: none;
+            z-index: 99;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+        .admin-link:hover {
+            opacity: 1;
+        }
+
+        @media (min-width: 768px) {
+            .product-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+            .product-img { height: 150px; }
+        }
+        @media (max-width: 480px) {
+            .navbar { padding: 10px 16px; }
+            .search-container { order: 3; max-width: 100%; width: 100%; margin-top: 8px; }
+            .logo { order: 1; }
+            .cart-icon { order: 2; }
+            .hero { padding: 40px 16px; }
+            .hero h2 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-fixed">
+    <div class="top-bar">
+        🕌 Warung Umi - Belanja Sembako | WA: 0852-1320-5216
+    </div>
+    <div class="navbar">
+        <div class="logo">
+            <img src="https://i.ibb.co.com/wf9YScd/logo-warung-umi.png" alt="Warung Umi Logo" onerror="this.src='https://via.placeholder.com/45?text=🕌'">
+            <div class="logo-text">
+                <h1>Warung Umi</h1>
+                <span>Pasar Keluarga Indonesia</span>
+            </div>
+        </div>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cari produk... (beras, minyak, gula)">
+                <button id="searchBtn">🔍</button>
+            </div>
+            <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+        <div class="cart-icon" id="cartIcon">
+            🛒 <span class="cart-count" id="cartCount">0</span>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="hero">
+        <h2>🍚 Belanja Sembako</h2>
+        <p>Murah, Berkah, dan Sampai ke Rumah Anda</p>
+        <a href="https://wa.me/6285213205216" class="wa-number" target="_blank">📞 Order via WhatsApp</a>
+    </div>
+
+    <div id="warningBanner" class="warning-banner">
+        <span>⚠️ Website ini masih dalam tahap pengembangan. Beberapa fitur mungkin belum sempurna. Terima kasih atas pengertiannya! 🙏</span>
+        <button class="close-warning" onclick="document.getElementById('warningBanner').style.display='none'">✕ Tutup</button>
+    </div>
+
+    <div class="promo-section">
+        <div id="promoBanner" class="promo-banner" onclick="window.open('https://wa.me/6285213205216', '_blank')">
+            <div class="promo-title" id="promoTitle">🎉 PROMO HEMAT! 🎉</div>
+            <div class="promo-desc" id="promoDesc">Gratis Ongkir + Diskon s/d 20%</div>
+        </div>
+    </div>
+
+    <div class="kategori-section">
+        <div class="kategori-grid" id="kategoriFilter">
+            <div class="chip active" data-kategori="semua">Semua</div>
+            <div class="chip" data-kategori="beras">🍚 Beras</div>
+            <div class="chip" data-kategori="minyak">🫒 Minyak</div>
+            <div class="chip" data-kategori="gula">🍬 Gula</div>
+            <div class="chip" data-kategori="telur">🥚 Telur</div>
+            <div class="chip" data-kategori="instan">🍜 Mie</div>
+            <div class="chip" data-kategori="bumbu">🧂 Bumbu</div>
+        </div>
+    </div>
+
+    <div class="products-section">
+        <div class="product-grid" id="productGrid"></div>
+        <div class="pagination" id="pagination"></div>
+    </div>
+</div>
+
+<!-- Link ke Admin Panel (kecil di pojok kanan bawah) -->
+<a href="admin.html" class="admin-link">🔧 Admin</a>
+
+<div class="footer-main">
+    <div class="hashtags">
+        <span>#WarungUmi</span><span>#BelanjaSembako</span><span>#MurahBerkah</span>
+        <span>#PesanViaWA</span><span>#LangsungOwner</span><span>#SembakoMurah</span>
+    </div>
+    <a href="https://wa.me/6285213205216" class="footer-wa" target="_blank">📞 Hubungi via WhatsApp</a>
+    <div class="footer-text">
+        Warung Umi | Jual Sembako & Keperluan Harian | Kirim ke Seluruh Indonesia<br>
+        © 2025 Warung Umi - Pasar Keluarga Indonesia
+    </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div style="display: flex; justify-content: space-between;">
+        <h3>🛍️ Keranjang</h3>
+        <button id="closeCartBtn" style="background:none; border:none; font-size:1.5rem;">✕</button>
+    </div>
+    <div id="cartItemsList" style="flex:1; overflow:auto; margin: 15px 0;"></div>
+    <div id="cartTotalPrice" style="font-weight:800; font-size:1.2rem;">Total: Rp0</div>
+    <button class="checkout-btn" id="checkoutWA">✅ Kirim ke WhatsApp</button>
+</div>
+
+<script>
+    let products = [];
+    let cart = [];
+    let currentFilter = "semua";
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let searchQuery = "";
+    let promoData = {};
+
+    function formatWeight(value, unit) {
+        if (!value && value !== 0) return "";
+        const num = parseFloat(value);
+        const formattedNum = Number.isInteger(num) ? num : num.toFixed(1);
+        return `${formattedNum}${unit}`;
+    }
+
+    function loadFromLocal() {
+        const stored = localStorage.getItem("warungUmi_products");
+        if(stored) { 
+            products = JSON.parse(stored); 
+        } else {
+            products = [
+                { id: 1, name: "Beras Raja Umi", kategori: "beras", price: 72000, image: "https://images.tokopedia.net/img/cache/500-square/VqbcmM/2023/1/23/0edba50f-857f-4d8a-9244-136f4e3215f0.jpg", weightValue: 5, weightUnit: "kg", weight: "5kg" },
+                { id: 2, name: "Minyak Goreng Bimoli", kategori: "minyak", price: 34500, image: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//104/MTA-157408265/bimoli_minyak-goreng-bimoli-2-liter_full02.jpg", weightValue: 2, weightUnit: "Liter", weight: "2 Liter" },
+                { id: 3, name: "Gulaku Premium", kategori: "gula", price: 17500, image: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//92/MTA-134687265/gulaku_gulaku-premium-1kg_full02.jpg", weightValue: 1, weightUnit: "kg", weight: "1kg" },
+                { id: 4, name: "Telur Ayam", kategori: "telur", price: 28500, image: "https://images.tokopedia.net/img/cache/500-square/VqbcmM/2020/11/25/5507a22a-8e9e-4e88-b1e1-6f8afb9ac9de.jpg", weightValue: 1, weightUnit: "kg", weight: "1kg" }
+            ];
+        }
+        
+        const storedPromo = localStorage.getItem("warungUmi_promo");
+        if(storedPromo) {
+            promoData = JSON.parse(storedPromo);
+        } else {
+            promoData = { title: "🎉 PROMO HEMAT! 🎉", desc: "Gratis Ongkir + Diskon s/d 20%" };
+        }
+        
+        const storedCart = localStorage.getItem("warungUmi_cart");
+        if(storedCart) { cart = JSON.parse(storedCart); }
+    }
+    
+    function saveCartToLocal() {
+        localStorage.setItem("warungUmi_cart", JSON.stringify(cart));
+    }
+    
+    loadFromLocal();
+
+    function renderPromo() {
+        document.getElementById("promoTitle").innerText = promoData.title;
+        document.getElementById("promoDesc").innerText = promoData.desc;
+    }
+
+    function aiSearch(query, productsList) {
+        if (!query.trim()) return productsList;
+        const queryLower = query.toLowerCase();
+        return productsList.filter(p => 
+            p.name.toLowerCase().includes(queryLower) || 
+            p.kategori.toLowerCase().includes(queryLower)
+        );
+    }
+
+    function getFilteredProducts() {
+        let filtered = products;
+        if(currentFilter !== "semua") {
+            filtered = filtered.filter(p => p.kategori === currentFilter);
+        }
+        if(searchQuery.trim() !== "") {
+            filtered = aiSearch(searchQuery, filtered);
+        }
+        return filtered;
+    }
+
+    function renderProducts() {
+        const filtered = getFilteredProducts();
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
+        const start = (currentPage - 1) * itemsPerPage;
+        const paginated = filtered.slice(start, start + itemsPerPage);
+        
+        const grid = document.getElementById("productGrid");
+        if(paginated.length === 0) {
+            grid.innerHTML = "<div style='text-align:center; padding:40px;'>Produk tidak ditemukan</div>";
+        } else {
+            grid.innerHTML = paginated.map(prod => {
+                const cartItem = cart.find(c => c.id === prod.id);
+                const qty = cartItem ? cartItem.quantity : 0;
+                return `
+                    <div class="product-card">
+                        <div class="product-img" style="background-image: url('${prod.image || 'https://via.placeholder.com/150?text=🛒'}'); background-size: cover; background-position: center;"></div>
+                        <div class="product-info">
+                            <div class="product-name">${prod.name}</div>
+                            <div class="product-weight">📦 ${prod.weight}</div>
+                            <div class="price">Rp${prod.price.toLocaleString()}</div>
+                            <div class="qty-control">
+                                <button class="qty-btn minus" data-id="${prod.id}">-</button>
+                                <span>${qty}</span>
+                                <button class="qty-btn plus" data-id="${prod.id}">+</button>
+                            </div>
+                            <button class="btn-wa quick-order" data-id="${prod.id}">💬 Beli</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        const paginationDiv = document.getElementById("pagination");
+        if(totalPages <= 1) {
+            paginationDiv.innerHTML = "";
+        } else {
+            let pages = [];
+            for(let i = 1; i <= totalPages; i++) {
+                pages.push(`<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`);
+            }
+            paginationDiv.innerHTML = pages.join('');
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    currentPage = parseInt(btn.dataset.page);
+                    renderProducts();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+        }
+        attachProductEvents();
+    }
+
+    function attachProductEvents() {
+        document.querySelectorAll('.plus').forEach(btn => {
+            btn.onclick = () => addToCart(parseInt(btn.dataset.id));
+        });
+        document.querySelectorAll('.minus').forEach(btn => {
+            btn.onclick = () => removeFromCart(parseInt(btn.dataset.id));
+        });
+        document.querySelectorAll('.quick-order').forEach(btn => {
+            btn.onclick = () => directOrder(parseInt(btn.dataset.id));
+        });
+    }
+
+    function addToCart(id) {
+        const prod = products.find(p => p.id === id);
+        if(!prod) return;
+        const existing = cart.find(c => c.id === id);
+        if(existing) existing.quantity++;
+        else cart.push({ id: prod.id, name: prod.name, price: prod.price, quantity: 1, weight: prod.weight });
+        saveCartToLocal();
+        updateCartUI();
+        renderProducts();
+    }
+
+    function removeFromCart(id) {
+        const idx = cart.findIndex(c => c.id === id);
+        if(idx !== -1) {
+            if(cart[idx].quantity > 1) cart[idx].quantity--;
+            else cart.splice(idx,1);
+        }
+        saveCartToLocal();
+        updateCartUI();
+        renderProducts();
+    }
+
+    function deleteCartItem(id) {
+        cart = cart.filter(c => c.id !== id);
+        saveCartToLocal();
+        updateCartUI();
+        renderProducts();
+    }
+
+    function updateCartUI() {
+        const count = cart.reduce((s,i)=> s+i.quantity,0);
+        document.getElementById("cartCount").innerText = count;
+        const container = document.getElementById("cartItemsList");
+        let total = 0;
+        if(cart.length===0) container.innerHTML = "<p style='color:gray; text-align:center;'>Keranjang kosong</p>";
+        else {
+            container.innerHTML = cart.map(item => {
+                total += item.price * item.quantity;
+                return `
+                    <div class="cart-item">
+                        <div><b>${item.name}</b><br><small>${item.weight}</small><br>Rp${item.price.toLocaleString()} x ${item.quantity}</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-weight:bold;">Rp${(item.price*item.quantity).toLocaleString()}</span>
+                            <button class="cart-remove-btn" data-id="${item.id}">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.querySelectorAll('.cart-remove-btn').forEach(btn => {
+                btn.onclick = () => { if(confirm("Hapus?")) deleteCartItem(parseInt(btn.dataset.id)); };
+            });
+        }
+        document.getElementById("cartTotalPrice").innerHTML = `Total: Rp${total.toLocaleString()}`;
+    }
+
+    function directOrder(productId) {
+        const prod = products.find(p=>p.id===productId);
+        if(!prod) return;
+        const msg = `*Pesanan Warung Umi*%0A${prod.name} - 1 pcs%0ATotal: Rp${prod.price.toLocaleString()}`;
+        window.open(`https://wa.me/6285213205216?text=${msg}`, '_blank');
+    }
+
+    function checkoutWA() {
+        if(cart.length===0) { alert("Keranjang kosong"); return; }
+        let msg = "*Pesanan Warung Umi*%0A";
+        let total=0;
+        cart.forEach(item=>{
+            let sub = item.price*item.quantity;
+            total+=sub;
+            msg+= `${item.name} - ${item.quantity} pcs = Rp${sub.toLocaleString()}%0A`;
+        });
+        msg+= `%0A*TOTAL: Rp${total.toLocaleString()}*`;
+        window.open(`https://wa.me/6285213205216?text=${msg}`, '_blank');
+    }
+
+    // Auto-suggestions
+    function getSuggestions(query) {
+        if (!query.trim()) return [];
+        const q = query.toLowerCase();
+        return products.filter(p => p.name.toLowerCase().includes(q)).slice(0, 5);
+    }
+
+    function showSuggestions() {
+        const query = document.getElementById("searchInput").value;
+        const suggestionsDiv = document.getElementById("searchSuggestions");
+        
+        if (query.trim().length < 2) {
+            suggestionsDiv.classList.remove("show");
+            return;
+        }
+        
+        const suggestions = getSuggestions(query);
+        if (suggestions.length === 0) {
+            suggestionsDiv.classList.remove("show");
+            return;
+        }
+        
+        suggestionsDiv.innerHTML = suggestions.map(prod => `
+            <div class="suggestion-item" data-id="${prod.id}">
+                <div><strong>${prod.name}</strong> - Rp${prod.price.toLocaleString()}</div>
+                <div class="suggestion-category">📦 ${prod.weight} • ${prod.kategori}</div>
+            </div>
+        `).join('');
+        
+        suggestionsDiv.classList.add("show");
+        
+        document.querySelectorAll(".suggestion-item").forEach(item => {
+            item.onclick = () => {
+                const id = parseInt(item.dataset.id);
+                const prod = products.find(p => p.id === id);
+                document.getElementById("searchInput").value = prod.name;
+                searchQuery = prod.name;
+                currentPage = 1;
+                renderProducts();
+                suggestionsDiv.classList.remove("show");
+            };
+        });
+    }
+
+    let searchTimeout;
+    document.getElementById("searchInput").addEventListener("input", () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            showSuggestions();
+        }, 300);
+    });
+    document.getElementById("searchBtn").onclick = () => {
+        searchQuery = document.getElementById("searchInput").value;
+        currentPage = 1;
+        renderProducts();
+        document.getElementById("searchSuggestions").classList.remove("show");
+    };
+    document.getElementById("searchInput").addEventListener("keypress", (e) => {
+        if(e.key === "Enter") {
+            searchQuery = e.target.value;
+            currentPage = 1;
+            renderProducts();
+            document.getElementById("searchSuggestions").classList.remove("show");
+        }
+    });
+    document.addEventListener("click", (e) => {
+        if(!e.target.closest(".search-container")) {
+            document.getElementById("searchSuggestions").classList.remove("show");
+        }
+    });
+    
+    document.querySelectorAll(".chip").forEach(chip => {
+        chip.onclick = () => {
+            document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+            chip.classList.add("active");
+            currentFilter = chip.dataset.kategori;
+            currentPage = 1;
+            renderProducts();
+        };
+    });
+    
+    const cartSide = document.getElementById("cartSidebar");
+    const overlay = document.getElementById("overlay");
+    document.getElementById("cartIcon").onclick = () => { cartSide.classList.add("open"); overlay.classList.add("active"); updateCartUI(); };
+    document.getElementById("closeCartBtn").onclick = () => { cartSide.classList.remove("open"); overlay.classList.remove("active"); };
+    overlay.onclick = () => { cartSide.classList.remove("open"); overlay.classList.remove("active"); };
+    document.getElementById("checkoutWA").onclick = checkoutWA;
+    
+    renderProducts();
+    updateCartUI();
+    renderPromo();
+    
+    setInterval(() => {
+        loadFromLocal();
+        renderProducts();
+        renderPromo();
+        updateCartUI();
+    }, 2000);
+</script>
+</body>
+</html>
