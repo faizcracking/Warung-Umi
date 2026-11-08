@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Login Admin - Warung Umi</title>
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body data-page="login" class="login-body">
+<main class="login-card">
+  <img src="/assets/logo.svg" alt="" width="56" height="56">
+  <h1>Admin Warung Umi</h1>
+  <p class="muted">Masuk untuk mengelola produk, promo, dan pesanan.</p>
+  <form id="login-form" novalidate>
+    <label>Username<input name="username" autocomplete="username" autocapitalize="none" required maxlength="40"></label>
+    <label>Password<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
+    <p id="login-error" class="form-error" role="alert" hidden></p>
+    <button class="btn primary block" id="login-btn">Masuk</button>
+  </form>
+  <p class="small"><a href="/">← Kembali ke toko</a></p>
+</main>
+<script src="/js/admin.js"></script>
+</body>
+</html>

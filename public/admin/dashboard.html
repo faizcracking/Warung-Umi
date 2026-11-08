@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Dashboard Admin - Warung Umi</title>
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body data-page="dashboard">
+<div class="shell" id="shell" hidden>
+  <aside class="side">
+    <div class="side-brand"><img src="/assets/logo.svg" alt="" width="34" height="34"><span>Warung Umi<small>Admin</small></span></div>
+    <nav id="menu">
+      <button data-view="overview" class="active">📊 Ringkasan</button>
+      <button data-view="products">📦 Produk</button>
+      <button data-view="categories">🏷️ Kategori</button>
+      <button data-view="orders">🧾 Pesanan</button>
+      <button data-view="settings">⚙️ Pengaturan Toko</button>
+      <button data-view="account">🔑 Akun & Password</button>
+    </nav>
+    <div class="side-foot"><a href="/" target="_blank" rel="noopener">Lihat toko ↗</a></div>
+  </aside>
+  <section class="main">
+    <header class="top"><h1 id="view-title">Ringkasan</h1><div><span id="who" class="muted"></span> <button id="logout" class="btn small">Keluar</button></div></header>
+    <div id="view" class="view"><p class="loading">Memuat...</p></div>
+  </section>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/js/admin.js"></script>
+</body>
+</html>

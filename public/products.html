@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semua Produk - Warung Umi</title>
+<meta name="description" content="Warung Umi - toko kelontong online. Belanja kebutuhan sehari-hari, pesan lewat WhatsApp.">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="products">
+<header id="site-header" class="site-header"></header>
+<main class="container page">
+<h1 class="page-title">Semua Produk</h1>
+<div class="filters">
+  <input id="f-q" type="search" placeholder="Cari nama produk..." maxlength="60" aria-label="Cari produk">
+  <select id="f-cat" aria-label="Filter kategori"><option value="">Semua kategori</option></select>
+  <select id="f-sort" aria-label="Urutkan">
+    <option value="newest">Terbaru</option>
+    <option value="price_asc">Harga terendah</option>
+    <option value="price_desc">Harga tertinggi</option>
+    <option value="discount">Diskon terbesar</option>
+  </select>
+</div>
+<p id="count" class="muted"></p>
+<div id="grid" class="grid"></div>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/js/shop.js"></script>
+<script src="/js/cart.js"></script>
+</body>
+</html>

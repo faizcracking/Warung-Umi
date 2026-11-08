@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout - Warung Umi</title>
+<meta name="description" content="Warung Umi - toko kelontong online. Belanja kebutuhan sehari-hari, pesan lewat WhatsApp.">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="checkout">
+<header id="site-header" class="site-header"></header>
+<main class="container page">
+<h1 class="page-title">Checkout</h1>
+<div id="checkout" class="cart-layout">
+  <form id="order-form" class="panel" novalidate>
+    <h2>Data pemesan</h2>
+    <label>Nama pelanggan<input name="name" required maxlength="80" autocomplete="name" placeholder="Nama Anda"></label>
+    <label>Nomor HP / WhatsApp<input name="phone" type="tel" required maxlength="20" autocomplete="tel" placeholder="08xxxxxxxxxx" inputmode="tel"></label>
+    <fieldset class="radios"><legend>Pengiriman</legend>
+      <label><input type="radio" name="delivery" value="diantar" checked> Diantar</label>
+      <label><input type="radio" name="delivery" value="ambil_sendiri"> Ambil sendiri di toko</label>
+    </fieldset>
+    <label id="address-wrap">Alamat lengkap<textarea name="address" rows="3" maxlength="300" placeholder="Jalan, RT/RW, desa, kecamatan"></textarea></label>
+    <label>Catatan pesanan (opsional)<textarea name="notes" rows="2" maxlength="300" placeholder="Contoh: mohon diantar sore hari"></textarea></label>
+    <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <p id="form-error" class="form-error" hidden></p>
+    <button id="submit-btn" class="btn primary block">Simpan pesanan & lanjut ke WhatsApp</button>
+    <p class="muted small">Pesanan dianggap resmi setelah dikonfirmasi oleh toko. Pembayaran dilakukan sesuai kesepakatan di WhatsApp.</p>
+  </form>
+  <aside id="summary" class="panel"><p class="loading">Memuat ringkasan...</p></aside>
+</div>
+<div id="done" class="panel done" hidden></div>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/js/shop.js"></script>
+<script src="/js/cart.js"></script>
+<script src="/js/checkout.js"></script>
+</body>
+</html>
