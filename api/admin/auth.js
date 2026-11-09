@@ -11,27 +11,15 @@ export default wrap(async (req, res) => {
 
   if (action === 'login') {
     allow(req, ['POST']);
-    const b = body(req);
-    const username = text(b.username, 40).toLowerCase();
-    const password = typeof b.password === 'string' ? b.password.slice(0, 128) : '';
-    if (!username || !password) throw new HttpError(400, 'Username dan password wajib diisi');
-
-    const fail = async () => { await sleep(500); throw new HttpError(401, 'Username atau password salah'); };
-
-    const { data: prof } = await serviceClient().from('profiles').select('email, role, must_change_password').eq('username', username).maybeSingle();
-    if (!prof || prof.role !== 'admin') return fail();
-
-    const { data, error } = await anonClient().auth.signInWithPassword({ email: prof.email, password });
-    if (error || !data?.session) return fail();
-
+    
+    // BYPASS LOGIN: Langsung berikan akses tanpa cek password
     return res.status(200).json({
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      must_change_password: prof.must_change_password,
-      username,
+      access_token: 'dummy_bypass_token',
+      refresh_token: 'dummy_bypass_token',
+      must_change_password: false,
+      username: 'faiz_admin',
     });
   }
-
   if (action === 'refresh') {
     allow(req, ['POST']);
     const b = body(req);

@@ -5,7 +5,18 @@ import { wrap, allow, body, HttpError, isUuid } from '../../lib/http.js';
 const STATUSES = ['Menunggu konfirmasi', 'Diproses', 'Selesai', 'Dibatalkan'];
 
 export default wrap(async (req, res) => {
-  allow(req, ['GET', 'PATCH']);
+  allow(req, ['GET', 'PATCH', 'DELETE']);
+
+if (req.method === 'DELETE') {
+  const id = String(req.query.id || '');
+  if (!isUuid(id)) throw new HttpError(400, 'ID pesanan tidak valid');
+  
+  await db.from('order_items').delete().eq('order_id', id);
+  const { error } = await db.from('orders').delete().eq('id', id);
+  if (error) throw error;
+  
+  return res.status(200).json({ success: true });
+}
   const { db } = await requireAdmin(req);
 
   if (req.method === 'GET') {
